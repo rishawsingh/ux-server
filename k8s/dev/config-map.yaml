@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-product-score-config
+data:
+  PORT: "8080"
+  ENV: "dev"
+  DB_MAX_QUERY_SECOND: "2"
+  SERVICE_NAME: "dev-product-score"

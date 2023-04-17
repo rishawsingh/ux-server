@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prod-product-score-server
+  name: prod-product-score-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prod-product-score-server
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: prod-product-score-server
+    spec:
+      containers:
+        - image: gcr.io/taf-mvp-1/product-score:main-bae7274455af264a952a007b9c5d9683a7e6e648
+          name: prod-product-score-server
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: prod-product-score-secret
+            - configMapRef:
+                name: prod-product-score-config
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health/
+              port: 8080
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 8080
+              scheme: HTTP
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: prod-product-score-server
+  name: prod-product-score-server
+spec:
+  ports:
+    - name: "http"
+      port: 80
+      targetPort: 8080
+  selector:
+    app: prod-product-score-server
+  type: NodePort
